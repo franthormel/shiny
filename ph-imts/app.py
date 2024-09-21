@@ -1,15 +1,50 @@
-from shiny import render, ui
-from shiny.express import input
+from shiny.express import input, module, render, ui
 from shinywidgets import render_widget
-from data import df, df_yearly, df_month_year
+from data import df, df_all, df_yearly, df_month_year
 import plotly.express as px
 
-ui.panel_title("Hello Shiny!")
-ui.input_slider("n", "N", 0, 100, 20)
+ui.panel_title("Philippine Total Trade, Imports, Exports, and Balance of Trade in Goods by Month and Year: 1991-2023")
 
-# TODO: display
+@module
+def cards_summary(input, output, session):
+    with ui.layout_columns(fill=False):
+        with ui.value_box():
+            "Exports"
+            
+            @render.express
+            def exports():
+                df_all['exports']
 
-@render_widget
-def plot():
-    fig = px.line(df, x='year_month', y=['imports', 'exports'])
-    return fig
+        with ui.value_box():
+            "Imports"
+            
+            @render.express
+            def imports():
+                df_all['imports']
+
+        with ui.value_box():
+            "Balance of Trade"
+            
+            @render.express
+            def bot():
+                df_all['botg']
+                
+        with ui.value_box():
+            "Total Trade"
+            
+            @render.express
+            def total():
+                df_all['total_trade']
+
+with ui.sidebar(position="right"):
+    "Sidebar"
+    
+with ui.navset_card_pill(id="navset_current"):
+    with ui.nav_panel("All"):
+        cards_summary("cards_summary_all")
+                    
+    with ui.nav_panel("Yearly"):
+        cards_summary("cards_summary_yearly")
+        
+    with ui.nav_panel("Monthly"):
+        "Monthly"

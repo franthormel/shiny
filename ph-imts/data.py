@@ -10,6 +10,11 @@ df.imports = pd.to_numeric(df.imports).astype(float)
 # %%
 df['botg'] = df.apply(lambda row: row.exports - row.imports, axis=1)
 df['total_trade'] = df.apply(lambda row: row.exports + row.imports, axis=1)
+
+# %%
+df_all = df.copy().set_index('year').sum(numeric_only=True)
+
+# %%
 df['imports_growth_rate'] = df['imports'].pct_change()
 df['exports_growth_rate'] = df['exports'].pct_change()
 df['botg_growth_rate'] = df['botg'].pct_change()
@@ -31,3 +36,15 @@ for i, column_rate in enumerate(column_rates):
 
 # %%
 df_month_year = df.pivot(index="month", columns="year")
+
+# %%
+# Compare values of the same year (eg: Exports of February and March in 1991)
+df_exports_1991 = df_month_year["exports"][1991].copy()
+
+# %%
+# Compare values of different years (eg: Monthly imports of the years 1994 & 1995)
+df_imports = df_month_year["imports"].copy()
+df_imports_1994 = df_imports[1994].copy()
+df_imports_1995 = df_imports[1995].copy()
+
+# %%

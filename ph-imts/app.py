@@ -1,4 +1,6 @@
-from data import df, df_all, df_yearly, df_month_year
+from data import df, df_all, df_year, df_month_each_year
+from shared import initialize, format_currency
+from shiny import reactive
 from shiny.express import input, module, render, ui
 from shinywidgets import render_widget
 import locale
@@ -10,19 +12,7 @@ ui.page_opts(
     lang="en",
 )
 
-def initialize():
-    locale.setlocale(locale.LC_ALL, "")
 initialize()
-
-def format_currency(value):
-    output = locale.currency(value, grouping=True)
-    
-    # Formatting a negative value encloses the output string inside parentheses.
-    # Remove the parentheses and put the negative sign instead.
-    if(output.startswith('(') and output.endswith(')')):
-        return f"-{output[1:-1]}"
-    
-    return output
 
 @module
 def cards_summary(input, output, session, df):
@@ -45,8 +35,8 @@ def cards_summary(input, output, session, df):
             "Balance of Trade"
             
             @render.express
-            def botg():
-                format_currency(df['botg'])
+            def balance_of_trade():
+                format_currency(df['balance_of_trade'])
                 
         with ui.value_box():
             "Total Trade"
@@ -63,26 +53,53 @@ with ui.navset_card_pill(id="navset_current"):
             with ui.card():
                 with ui.card_header():
                     "Summary"
+                # TODO: Add                    
                 "Put summary here"
             
             with ui.card(full_screen=True):
                 with ui.card_header():
                     "Timeline"
+                
+                # TODO: Add                    
                 "Put line chart here"
                 
             with ui.card(full_screen=True):
                 with ui.card_header():
                     "Trade Composition"
-                "Put pie chart here"
+                
+                @render_widget
+                def pie_chart():
+                    return px.pie(
+                        data_frame=df_all,
+                        values="total_trade",
+                    )
+                    
                 
             with ui.card(full_screen=True):
                 with ui.card_header():
-                    "Data Table"
-                "Put DataGrid chart here"
+                    "Trade Values"
+                
+                @render.data_frame
+                def datagrid():
+                    return render.DataGrid(df, selection_mode="rows")
                     
     with ui.nav_panel("Yearly"):
         cards_summary("cards_summary_yearly", df_all)
         
     with ui.nav_panel("Monthly"):
-        # TODO: Use correct data
-        cards_summary("cards_summary_monthly", df_all)
+        # TODO: Get year data from input
+        with ui.layout_columns(fill=False, col_widths=[12]):
+            ui.input_selectize(
+                id="selectize_monthly_year",
+                label="Select year",
+                choices={x: x for x in range(1991, 2024)}
+            )
+            
+            @reactive.calc
+            def df_monthly_year():
+                year = int(input.selectize_monthly_year())
+                return df_year.loc[year]
+            
+            # TODO: Make this reactive based on selectize input
+            # https://shiny.posit.co/py/docs/module-communication.html#passing-reactives-to-modules
+            cards_summary("cards_summary_monthly_year", df_year.loc[1991])

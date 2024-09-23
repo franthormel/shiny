@@ -32,3 +32,12 @@ for i, column_rate in enumerate(column_rates):
 # NOTE: Monthly data
 # Group by month per year
 df_month_each_year = df.pivot(index="year", columns="month")
+
+def get_df_col_vals(df, col):
+    new_df = pd.DataFrame(df[col]).rename(columns={col: "values"})
+    new_df['type'] = col
+    return new_df
+
+# Pie chart (all)
+frames = [get_df_col_vals(df, "exports"), get_df_col_vals(df, "imports")]
+pie_all = pd.concat(frames)

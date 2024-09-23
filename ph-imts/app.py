@@ -1,4 +1,4 @@
-from data import df, df_all, df_year, df_month_each_year
+from data import df, df_all, df_year, df_month_each_year, pie_all
 from shared import initialize, format_currency
 from shiny import reactive
 from shiny.express import input, module, render, ui
@@ -69,11 +69,7 @@ with ui.navset_card_pill(id="navset_current"):
                 
                 @render_widget
                 def pie_chart():
-                    return px.pie(
-                        data_frame=df_all,
-                        values="total_trade",
-                    )
-                    
+                    return px.pie(data_frame=pie_all, values='values', names='type')
                 
             with ui.card(full_screen=True):
                 with ui.card_header():

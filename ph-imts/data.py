@@ -1,4 +1,7 @@
 
+from datetime import date
+
+import calendar
 import pandas as pd
 
 df = pd.read_csv('trade.csv')
@@ -33,11 +36,26 @@ for i, column_rate in enumerate(column_rates):
 # Group by month per year
 df_month_each_year = df.pivot(index="year", columns="month")
 
-def get_df_col_vals(df, col):
-    new_df = pd.DataFrame(df[col]).rename(columns={col: "values"})
+def create_date(row):
+    year = int(row['year'])
+    month = list(calendar.month_abbr).index(row['month'])
+    day = 1
+    date_created = date(year, month, day)
+    return date_created.strftime("%Y-%m-%d")
+
+def get_df_col_vals(df, col, col_rename="values"):
+    # Get column values
+    new_df = pd.DataFrame(df[col]).rename(columns={col: col_rename})
     new_df['type'] = col
+    
+    # Add date in YYYY-MM-DD format
+    new_df['date'] = df.apply(lambda row: create_date(row), axis=1)
+    
     return new_df
 
-# Pie chart (all)
-frames = [get_df_col_vals(df, "exports"), get_df_col_vals(df, "imports")]
-pie_all = pd.concat(frames)
+# Charts (all)
+frames = [
+    get_df_col_vals(df, "exports"),
+    get_df_col_vals(df, "imports")
+]
+df_chart_all = pd.concat(frames)

@@ -1,9 +1,8 @@
-from data import df, df_all, df_year, df_month_each_year, pie_all
+from data import df, df_all, df_year, df_chart_all
 from shared import initialize, format_currency
 from shiny import reactive
 from shiny.express import input, module, render, ui
 from shinywidgets import render_widget
-import locale
 import plotly.express as px
 
 ui.page_opts(
@@ -50,18 +49,35 @@ with ui.navset_card_pill(id="navset_current"):
         with ui.layout_columns(fill=False, col_widths=[12, 12, 6, 6, 12]):
             cards_summary("cards_summary_all", df_all)
                 
-            with ui.card():
-                with ui.card_header():
-                    "Summary"
-                # TODO: Add                    
-                "Put summary here"
             
             with ui.card(full_screen=True):
                 with ui.card_header():
                     "Timeline"
                 
+                ui.input_checkbox("checkbox_line_markers", "Show markers", False)
+                
+                # TODO: Add charts for growth rates                    
+                @render_widget
+                def line_chart():
+                    return px.line(
+                        df_chart_all,
+                        x="date",
+                        y="values",
+                        markers=input.checkbox_line_markers(),
+                        color='type',
+                        title="Philippines Imports, Exports from 1991 to 2023",
+                        labels={
+                            "values": "Trade Value (million USD)",
+                            "type": "Type",
+                            "date": "Trade Month & Year"
+                        }
+                    )
+                
+            with ui.card():
+                with ui.card_header():
+                    "Summary"
                 # TODO: Add                    
-                "Put line chart here"
+                "Put summary here"
                 
             with ui.card(full_screen=True):
                 with ui.card_header():
@@ -69,7 +85,7 @@ with ui.navset_card_pill(id="navset_current"):
                 
                 @render_widget
                 def pie_chart():
-                    return px.pie(data_frame=pie_all, values='values', names='type')
+                    return px.pie(data_frame=df_chart_all, values='values', names='type')
                 
             with ui.card(full_screen=True):
                 with ui.card_header():

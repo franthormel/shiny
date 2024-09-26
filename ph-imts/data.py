@@ -1,8 +1,5 @@
-
-from datetime import date
-
-import calendar
 import pandas as pd
+from shared import create_date
 
 df = pd.read_csv('trade.csv')
 df.exports = pd.to_numeric(df.exports).astype(float)
@@ -18,6 +15,7 @@ df['imports_growth_rate'] = df['imports'].pct_change()
 df['exports_growth_rate'] = df['exports'].pct_change()
 df['balance_of_trade_growth_rate'] = df['balance_of_trade'].pct_change()
 df['total_trade_growth_rate'] = df['total_trade'].pct_change()
+df['date'] = df.apply(lambda row: create_date(row), axis=1)
 
 # NOTE: Yearly data
 column_rates = ["imports_growth_rate", "exports_growth_rate", "balance_of_trade_growth_rate", "total_trade_growth_rate"]
@@ -36,26 +34,20 @@ for i, column_rate in enumerate(column_rates):
 # Group by month per year
 df_month_each_year = df.pivot(index="year", columns="month")
 
-def create_date(row):
-    year = int(row['year'])
-    month = list(calendar.month_abbr).index(row['month'])
-    day = 1
-    date_created = date(year, month, day)
-    return date_created.strftime("%Y-%m-%d")
-
-def get_df_col_vals(df, col, col_rename="values"):
+def categorize_col_vals(df, col):
     # Get column values
-    new_df = pd.DataFrame(df[col]).rename(columns={col: col_rename})
+    new_df = pd.DataFrame(df[col]).rename(columns={col: "values"})
     new_df['type'] = col
-    
-    # Add date in YYYY-MM-DD format
-    new_df['date'] = df.apply(lambda row: create_date(row), axis=1)
-    
+    new_df['date'] = df['date']
     return new_df
 
-# Charts (all)
-frames = [
-    get_df_col_vals(df, "exports"),
-    get_df_col_vals(df, "imports")
-]
-df_chart_all = pd.concat(frames)
+# NOTE: Charts (all)
+df_chart_all_import_exports = pd.concat([
+    categorize_col_vals(df, "exports"),
+    categorize_col_vals(df, "imports")
+])
+
+df_chart_all_import_exports_growth_rate = pd.concat([
+    categorize_col_vals(df, "exports_growth_rate"),
+    categorize_col_vals(df, "imports_growth_rate")
+])

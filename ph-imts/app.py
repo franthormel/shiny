@@ -59,7 +59,7 @@ def change_plotly_legend_position(fig):
 
 with ui.navset_card_pill(id="navset_current"):
     with ui.nav_panel("All"):
-        with ui.layout_columns(fill=False, col_widths=[12, 12, 12, 6, 6, 12]):
+        with ui.layout_columns(fill=False, col_widths=[12, 12, 12, 6, 6]):
             # Summary
             cards_summary("cards_summary_all", df_all)
             
@@ -164,12 +164,6 @@ with ui.navset_card_pill(id="navset_current"):
                         title="Balance of Trade Value Growth Rates from 1991 to 2023",
                         labels=chart_labels_growth_rates
                     )
-                
-            # TODO: Summary
-            with ui.card():
-                with ui.card_header():
-                    "Summary"
-                "Put summary here"
                 
             # Trade Composition (Pie chart)
             with ui.card(full_screen=True):

@@ -90,7 +90,7 @@ def change_plotly_legend_position(fig):
 
 with ui.navset_card_pill(id="navset_current"):
     with ui.nav_panel("All"):
-        with ui.layout_columns(fill=False, col_widths=[12, 12, 12, 6, 6]):
+        with ui.layout_columns(fill=False, col_widths=[12]):
             cards_summary("cards_summary_all", df_all)
             
             # Trade Values (Line charts)
@@ -199,7 +199,7 @@ with ui.navset_card_pill(id="navset_current"):
             data_grid("data_grid_all", df, "Trade Data")
                     
     with ui.nav_panel("Yearly"):
-        with ui.layout_columns(fill=False, col_widths=[12, 12, 12, 6, 6]):
+        with ui.layout_columns(fill=False, col_widths=[12]):
             cards_summary("cards_summary_yearly", df_all)
             
             # TODO: Trade Values (Line charts)

@@ -1,4 +1,4 @@
-from data import df, df_all, df_year, df_all_chart_import_exports, df_all_chart_import_exports_growth_rate
+from data import *
 from shared import initialize, format_currency
 from shiny import reactive
 from shiny.express import input, module, render, ui
@@ -206,7 +206,7 @@ with ui.navset_card_pill(id="navset_current"):
             # TODO: Trade Values Growth Rates (Line charts)
             
             pie_chart("pie_chart_yearly", df_all_chart_import_exports, "Trade Composition")
-            data_grid("data_grid_yearly", df_year, "Trade Data")
+            data_grid("data_grid_yearly", df_yearly_datagrid, "Trade Data")
         
     with ui.nav_panel("Monthly"):
         # TODO: Get year data from input
@@ -220,8 +220,8 @@ with ui.navset_card_pill(id="navset_current"):
             @reactive.calc
             def df_monthly_year():
                 year = int(input.selectize_monthly_year())
-                return df_year.loc[year]
+                return df_yearly.loc[year]
             
             # TODO: Make this reactive based on selectize input
             # https://shiny.posit.co/py/docs/module-communication.html#passing-reactives-to-modules
-            cards_summary("cards_summary_monthly_year", df_year.loc[1991])
+            cards_summary("cards_summary_monthly_year", df_yearly.loc[1991])

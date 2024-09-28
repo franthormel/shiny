@@ -14,6 +14,12 @@ ui.page_opts(
 # Set locale so it can be used for formatting trade values
 initialize()
 
+def choose_value_box_theme(val):
+    if val < 0:
+        return "danger"
+    else:
+        return "success"
+
 @module
 def cards_summary(input, output, session, df):
     with ui.layout_columns(fill=False):
@@ -34,7 +40,7 @@ def cards_summary(input, output, session, df):
                 format_currency(df['imports'])
 
         # Balance of Trade
-        with ui.value_box():
+        with ui.value_box(theme=choose_value_box_theme(df['balance_of_trade'])):
             "Balance of Trade"
             
             @render.express
@@ -49,6 +55,31 @@ def cards_summary(input, output, session, df):
             def total():
                 format_currency(df['total_trade'])
 
+@module
+def pie_chart(input, output, session, df, title):
+    with ui.card(full_screen=True):
+        with ui.card_header():
+            title
+        
+        @render_widget
+        def pie_chart():
+            return px.pie(
+                data_frame=df, 
+                values='values', 
+                names='type'
+            )
+
+@module
+def data_grid(input, output, session, df, title):
+    # Trade Data (DataGrid)
+    with ui.card(full_screen=True):
+        with ui.card_header():
+            title
+        
+        @render.data_frame
+        def datagrid():
+            return render.DataGrid(df, selection_mode="rows")
+
 def change_plotly_legend_position(fig):
     fig.update_layout(legend=dict(
                         yanchor="top",
@@ -60,7 +91,6 @@ def change_plotly_legend_position(fig):
 with ui.navset_card_pill(id="navset_current"):
     with ui.nav_panel("All"):
         with ui.layout_columns(fill=False, col_widths=[12, 12, 12, 6, 6]):
-            # Summary
             cards_summary("cards_summary_all", df_all)
             
             # Trade Values (Line charts)
@@ -165,27 +195,8 @@ with ui.navset_card_pill(id="navset_current"):
                         labels=chart_labels_growth_rates
                     )
                 
-            # Trade Composition (Pie chart)
-            with ui.card(full_screen=True):
-                with ui.card_header():
-                    "Trade Composition"
-                
-                @render_widget
-                def pie_chart():
-                    return px.pie(
-                        data_frame=df_chart_all_import_exports, 
-                        values='values', 
-                        names='type'
-                    )
-                
-            # Trade Data (DataGrid)
-            with ui.card(full_screen=True):
-                with ui.card_header():
-                    "Trade Data"
-                
-                @render.data_frame
-                def datagrid():
-                    return render.DataGrid(df, selection_mode="rows")
+            pie_chart("pie_chart_all", df_chart_all_import_exports, "Trade Composition")
+            data_grid("data_grid_all", df, "Trade Data")
                     
     with ui.nav_panel("Yearly"):
         cards_summary("cards_summary_yearly", df_all)

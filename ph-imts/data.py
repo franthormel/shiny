@@ -49,12 +49,12 @@ def categorize_col_vals(df, col, type=''):
     return new_df
 
 # NOTE: Charts (all)
-df_chart_all_import_exports = pd.concat([
+df_all_chart_import_exports = pd.concat([
     categorize_col_vals(df, "exports", "Exports"),
     categorize_col_vals(df, "imports", "Imports")
 ])
 
-df_chart_all_import_exports_growth_rate = pd.concat([
+df_all_chart_import_exports_growth_rate = pd.concat([
     categorize_col_vals(df, "exports_growth_rate", "Exports"),
     categorize_col_vals(df, "imports_growth_rate", "Imports")
 ])

@@ -1,4 +1,4 @@
-from data import df, df_all, df_year, df_chart_all_import_exports, df_chart_all_import_exports_growth_rate
+from data import df, df_all, df_year, df_all_chart_import_exports, df_all_chart_import_exports_growth_rate
 from shared import initialize, format_currency
 from shiny import reactive
 from shiny.express import input, module, render, ui
@@ -111,7 +111,7 @@ with ui.navset_card_pill(id="navset_current"):
                 @render_widget
                 def line_chart_import_exports():
                     fig = px.line(
-                        df_chart_all_import_exports,
+                        df_all_chart_import_exports,
                         x="date",
                         y="values",
                         markers=input.checkbox_line_markers(),
@@ -162,7 +162,7 @@ with ui.navset_card_pill(id="navset_current"):
                 @render_widget
                 def line_chart_import_exports_growth_rate():
                     fig = px.line(
-                        df_chart_all_import_exports_growth_rate,
+                        df_all_chart_import_exports_growth_rate,
                         x="date",
                         y="values",
                         markers=input.checkbox_line_growth_rates_markers(),
@@ -195,11 +195,18 @@ with ui.navset_card_pill(id="navset_current"):
                         labels=chart_labels_growth_rates
                     )
                 
-            pie_chart("pie_chart_all", df_chart_all_import_exports, "Trade Composition")
+            pie_chart("pie_chart_all", df_all_chart_import_exports, "Trade Composition")
             data_grid("data_grid_all", df, "Trade Data")
                     
     with ui.nav_panel("Yearly"):
-        cards_summary("cards_summary_yearly", df_all)
+        with ui.layout_columns(fill=False, col_widths=[12, 12, 12, 6, 6]):
+            cards_summary("cards_summary_yearly", df_all)
+            
+            # TODO: Trade Values (Line charts)
+            # TODO: Trade Values Growth Rates (Line charts)
+            
+            pie_chart("pie_chart_yearly", df_all_chart_import_exports, "Trade Composition")
+            data_grid("data_grid_yearly", df_year, "Trade Data")
         
     with ui.nav_panel("Monthly"):
         # TODO: Get year data from input

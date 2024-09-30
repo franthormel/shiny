@@ -62,11 +62,14 @@ df_yearly_chart_import_exports = pd.concat([
     categorize_col_vals(df_yearly, "imports", "Imports")
 ])
 
+df_yearly_chart_import_exports_growth_rate = pd.concat([
+    categorize_col_vals(df_yearly, "exports_growth_rate", "Exports"),
+    categorize_col_vals(df_yearly, "imports_growth_rate", "Imports")
+])
+
 # NOTE: Yearly (DataGrid)
 df_yearly_indices = pd.DataFrame(df_yearly.index, index=df_yearly.index)
 df_yearly_datagrid = pd.concat([df_yearly_indices, df_yearly], axis=1)
 
-
 # NOTE: Monthly
 df_month_each_year = df.pivot(index="year", columns="month")
-

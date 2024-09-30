@@ -71,7 +71,6 @@ def pie_chart(input, output, session, df, title):
 
 @module
 def data_grid(input, output, session, df, title):
-    # Trade Data (DataGrid)
     with ui.card(full_screen=True):
         with ui.card_header():
             title
@@ -79,14 +78,26 @@ def data_grid(input, output, session, df, title):
         @render.data_frame
         def datagrid():
             return render.DataGrid(df, selection_mode="rows")
+      
+def create_line_chart_imports_exports(df, markers, x, title, labels):
+    fig = px.line(
+            df,
+            x=x,
+            y="values",
+            markers=markers,
+            color='type',
+            title=title,
+            labels=labels
+        ).update_layout(legend=dict(
+            yanchor="top",
+            y=0.97,
+            xanchor="left",
+            x=0.01
+        ))
+    return fig
 
-def change_plotly_legend_position(fig):
-    fig.update_layout(legend=dict(
-                        yanchor="top",
-                        y=0.97,
-                        xanchor="left",
-                        x=0.01
-                    ))
+with ui.sidebar(position="right"):  
+    ui.input_checkbox("checkbox_show_line_chart_markers", "Show markers", False)
 
 with ui.navset_card_pill(id="navset_current"):
     with ui.nav_panel("All"):
@@ -95,7 +106,7 @@ with ui.navset_card_pill(id="navset_current"):
             
             # Trade Values (Line charts)
             with ui.card(full_screen=True):
-                chart_labels_values={
+                line_chart_all_labels={
                     "values": "Trade Value (million USD)",
                     "type": "Type",
                     "date": "Trade Month & Year",
@@ -106,47 +117,42 @@ with ui.navset_card_pill(id="navset_current"):
                 with ui.card_header():
                     "Trade Values"
                 
-                ui.input_checkbox("checkbox_line_markers", "Show markers", False)
-                
                 @render_widget
-                def line_chart_import_exports():
-                    fig = px.line(
-                        df_all_chart_import_exports,
+                def line_chart_all_import_exports():
+                    fig = create_line_chart_imports_exports(
+                        df=df_all_chart_import_exports,
+                        markers=input.checkbox_show_line_chart_markers(),
                         x="date",
-                        y="values",
-                        markers=input.checkbox_line_markers(),
-                        color='type',
                         title="Imports, Exports from 1991 to 2023",
-                        labels=chart_labels_values
+                        labels=line_chart_all_labels
                     )
-                    change_plotly_legend_position(fig)
                     return fig
                 
                 @render_widget
-                def line_chart_total():
+                def line_chart_all_total():
                     return px.line(
                         df,
                         x="date",
                         y="total_trade",
-                        markers=input.checkbox_line_markers(),
+                        markers=input.checkbox_show_line_chart_markers(),
                         title="Total Trade Value from 1991 to 2023",
-                        labels=chart_labels_values
+                        labels=line_chart_all_labels
                     )
                 
                 @render_widget
-                def line_chart_balance():
+                def line_chart_all_balance():
                     return px.line(
                         df,
                         x="date",
                         y="balance_of_trade",
-                        markers=input.checkbox_line_markers(),
+                        markers=input.checkbox_show_line_chart_markers(),
                         title="Balance of Trade Value from 1991 to 2023",
-                        labels=chart_labels_values
+                        labels=line_chart_all_labels
                     )
                 
             # Trade Values Growth Rates (Line charts)
             with ui.card(full_screen=True):
-                chart_labels_growth_rates={
+                line_chart_all_labels_growth_rates={
                     "values": "Trade Value Growth Rates (percentage)",
                     "type": "Type",
                     "date": "Trade Month & Year",
@@ -156,43 +162,38 @@ with ui.navset_card_pill(id="navset_current"):
                 
                 with ui.card_header():
                     "Trade Values Growth Rates"
-                
-                ui.input_checkbox("checkbox_line_growth_rates_markers", "Show markers", False)
                         
                 @render_widget
-                def line_chart_import_exports_growth_rate():
-                    fig = px.line(
-                        df_all_chart_import_exports_growth_rate,
+                def line_chart_all_import_exports_growth_rate():
+                    fig = create_line_chart_imports_exports(
+                        df=df_all_chart_import_exports_growth_rate,
+                        markers=input.checkbox_show_line_chart_markers(),
                         x="date",
-                        y="values",
-                        markers=input.checkbox_line_growth_rates_markers(),
-                        color='type',
                         title="Imports, Exports Growth Rates from 1991 to 2023",
-                        labels=chart_labels_growth_rates
+                        labels=line_chart_all_labels_growth_rates
                     )
-                    change_plotly_legend_position(fig)
                     return fig
                 
                 @render_widget
-                def line_chart_total_growth_rate():
+                def line_chart_all_total_growth_rate():
                     return px.line(
                         df,
                         x="date",
                         y="total_trade_growth_rate",
-                        markers=input.checkbox_line_growth_rates_markers(),
+                        markers=input.checkbox_show_line_chart_markers(),
                         title="Total Trade Value Growth Rates from 1991 to 2023",
-                        labels=chart_labels_growth_rates
+                        labels=line_chart_all_labels_growth_rates
                     )
                 
                 @render_widget
-                def line_chart_balance_growth_rate():
+                def line_chart_all_balance_growth_rate():
                     return px.line(
                         df,
                         x="date",
                         y="balance_of_trade_growth_rate",
-                        markers=input.checkbox_line_growth_rates_markers(),
+                        markers=input.checkbox_show_line_chart_markers(),
                         title="Balance of Trade Value Growth Rates from 1991 to 2023",
-                        labels=chart_labels_growth_rates
+                        labels=line_chart_all_labels_growth_rates
                     )
                 
             pie_chart("pie_chart_all", df_all_chart_import_exports, "Trade Composition")
@@ -202,10 +203,99 @@ with ui.navset_card_pill(id="navset_current"):
         with ui.layout_columns(fill=False, col_widths=[12]):
             cards_summary("cards_summary_yearly", df_all)
             
-            # TODO: Trade Values (Line charts)
-            # TODO: Trade Values Growth Rates (Line charts)
+            # Trade Values (Line charts)
+            with ui.card(full_screen=True):
+                line_chart_yearly_labels={
+                    "values": "Trade Value (million USD)",
+                    "type": "Type",
+                    "year": "Trade Year",
+                    "total_trade": "Total Trade Value (million USD)",
+                    "balance_of_trade": "Balance of Trade Value (million USD)",
+                }
+                
+                with ui.card_header():
+                    "Trade Values"
+                
+                @render_widget
+                def line_chart_yearly_import_exports():
+                    fig = create_line_chart_imports_exports(
+                        df=df_yearly_chart_import_exports,
+                        markers=input.checkbox_show_line_chart_markers(),
+                        x=df_yearly_chart_import_exports.index,
+                        title="Imports, Exports from 1991 to 2023",
+                        labels=line_chart_yearly_labels
+                    )
+                    return fig
+                
+                @render_widget
+                def line_chart_yearly_total():
+                    return px.line(
+                        df_yearly,
+                        x=df_yearly.index,
+                        y="total_trade",
+                        markers=input.checkbox_show_line_chart_markers(),
+                        title="Total Trade Value from 1991 to 2023",
+                        labels=line_chart_yearly_labels
+                    )
+                
+                @render_widget
+                def line_chart_yearly_balance():
+                    return px.line(
+                        df_yearly,
+                        x=df_yearly.index,
+                        y="balance_of_trade",
+                        markers=input.checkbox_show_line_chart_markers(),
+                        title="Balance of Trade Value from 1991 to 2023",
+                        labels=line_chart_yearly_labels
+                    )
+              
+            # Trade Values Growth Rates (Line charts)
+            with ui.card(full_screen=True):
+                line_chart_yearly_labels_growth_rates={
+                    "values": "Trade Value Growth Rates (percentage)",
+                    "type": "Type",
+                    "year": "Trade Year",
+                    "total_trade_growth_rate": "Total Trade Value Growth Rates (percentage)",
+                    "balance_of_trade_growth_rate": "Balance of Trade Value Growth Rates (percentage)",
+                }
+                
+                with ui.card_header():
+                    "Trade Values Growth Rates"
+                        
+                @render_widget
+                def line_chart_yearly_import_exports_growth_rate():
+                    fig = create_line_chart_imports_exports(
+                        df=df_yearly_chart_import_exports_growth_rate,
+                        markers=input.checkbox_show_line_chart_markers(),
+                        x=df_yearly_chart_import_exports_growth_rate.index,
+                        title="Imports, Exports Growth Rates from 1991 to 2023",
+                        labels=line_chart_yearly_labels_growth_rates
+                    )
+                    return fig
+                
+                @render_widget
+                def line_chart_yearly_total_growth_rate():
+                    return px.line(
+                        df_yearly,
+                        x=df_yearly.index,
+                        y="total_trade_growth_rate",
+                        markers=input.checkbox_show_line_chart_markers(),
+                        title="Total Trade Value Growth Rates from 1991 to 2023",
+                        labels=line_chart_yearly_labels_growth_rates
+                    )
+                
+                @render_widget
+                def line_chart_yearly_balance_growth_rate():
+                    return px.line(
+                        df_yearly,
+                        x=df_yearly.index,
+                        y="balance_of_trade_growth_rate",
+                        markers=input.checkbox_show_line_chart_markers(),
+                        title="Balance of Trade Value Growth Rates from 1991 to 2023",
+                        labels=line_chart_yearly_labels_growth_rates
+                    )
             
-            pie_chart("pie_chart_yearly", df_all_chart_import_exports, "Trade Composition")
+            pie_chart("pie_chart_yearly", df_yearly_chart_import_exports, "Trade Composition")
             data_grid("data_grid_yearly", df_yearly_datagrid, "Trade Data")
         
     with ui.nav_panel("Monthly"):

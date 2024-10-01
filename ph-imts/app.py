@@ -4,6 +4,7 @@ from shiny import reactive
 from shiny.express import input, module, render, ui
 from shinywidgets import render_widget
 import plotly.express as px
+import pandas as pd
 
 ui.page_opts(
     title="Philippine Total Trade, Imports, Exports, and Balance of Trade in Goods by Month and Year: 1991-2023 (in million USD)",
@@ -314,14 +315,64 @@ with ui.navset_card_pill(id="navset_current"):
                 year_input.set(int(input.selectize_monthly_year()))
             
             @reactive.calc
-            def choose_monthly_df():
+            def choose_monthly_series():
                 year = int(input.selectize_monthly_year())
                 return df_yearly.loc[year]
             
             @reactive.calc
-            def choose_monthly_theme():
-                df = choose_monthly_df()
-                return choose_value_box_theme(df['balance_of_trade'])
+            def choose_monthly_df():
+                year = int(input.selectize_monthly_year())
+                return df_monthly_group.get_group(year)
             
-            # TODO: Make this reactive based on selectize input
-            # https://shiny.posit.co/py/docs/module-communication.html#passing-reactives-to-modules
+            with ui.layout_columns(fill=False, col_widths=[12]):
+                # Summary
+                with ui.layout_columns(fill=False):
+                    # Exports
+                    with ui.value_box():
+                        "Exports"
+                        
+                        @render.express
+                        def exports():
+                            format_currency(choose_monthly_series()['exports'])
+
+                    # Imports
+                    with ui.value_box():
+                        "Imports"
+                        
+                        @render.express
+                        def imports():
+                            format_currency(choose_monthly_series()['imports'])
+
+                    # Balance of Trade
+                    with ui.value_box():
+                        "Balance of Trade"
+                        
+                        @render.express
+                        def balance_of_trade():
+                            format_currency(choose_monthly_series()['balance_of_trade'])
+                            
+                    # Total Trade
+                    with ui.value_box():
+                        "Total Trade"
+                        
+                        @render.express
+                        def total():
+                            format_currency(choose_monthly_series()['total_trade'])
+
+                # TODO: Trade Values Growth Rates (Line charts)
+                
+                
+                # TODO: Trade Values Growth Rates (Line charts)
+                
+                
+                # TODO: Pie chart
+                
+
+                # Data Grid
+                with ui.card(full_screen=True):
+                    with ui.card_header():
+                        "Trade Data"
+                    
+                    @render.data_frame
+                    def datagrid():
+                        return render.DataGrid(pd.DataFrame(choose_monthly_df()), selection_mode="rows")

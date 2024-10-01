@@ -48,8 +48,7 @@ df_all_chart_import_exports_growth_rate = pd.concat([
 column_rates = ["imports_growth_rate", "exports_growth_rate", "balance_of_trade_growth_rate", "total_trade_growth_rate"]
 column_rates_src = ["imports", "exports", "balance_of_trade", "total_trade"]
 
-df_yearly = df.copy()
-df_yearly = df_yearly.groupby('year')
+df_yearly = df.copy().groupby('year')
 df_yearly = df_yearly.sum(numeric_only=True)
 
 for i, column_rate in enumerate(column_rates):
@@ -72,4 +71,4 @@ df_yearly_indices = pd.DataFrame(df_yearly.index, index=df_yearly.index)
 df_yearly_datagrid = pd.concat([df_yearly_indices, df_yearly], axis=1)
 
 # NOTE: Monthly
-df_month_each_year = df.pivot(index="year", columns="month")
+df_monthly_group = df.copy().groupby("year")

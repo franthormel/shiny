@@ -299,7 +299,6 @@ with ui.navset_card_pill(id="navset_current"):
             data_grid("data_grid_yearly", df_yearly_datagrid, "Trade Data")
         
     with ui.nav_panel("Monthly"):
-        # TODO: Get year data from input
         with ui.layout_columns(fill=False, col_widths=[12]):
             ui.input_selectize(
                 id="selectize_monthly_year",
@@ -307,11 +306,22 @@ with ui.navset_card_pill(id="navset_current"):
                 choices={x: x for x in range(1991, 2024)}
             )
             
+            year_input = reactive.value(1991)
+            
+            @reactive.effect
+            @reactive.event(input.selectize_monthly_year)
+            def _():
+                year_input.set(int(input.selectize_monthly_year()))
+            
             @reactive.calc
-            def df_monthly_year():
+            def choose_monthly_df():
                 year = int(input.selectize_monthly_year())
                 return df_yearly.loc[year]
             
+            @reactive.calc
+            def choose_monthly_theme():
+                df = choose_monthly_df()
+                return choose_value_box_theme(df['balance_of_trade'])
+            
             # TODO: Make this reactive based on selectize input
             # https://shiny.posit.co/py/docs/module-communication.html#passing-reactives-to-modules
-            cards_summary("cards_summary_monthly_year", df_yearly.loc[1991])

@@ -71,4 +71,9 @@ df_yearly_indices = pd.DataFrame(df_yearly.index, index=df_yearly.index)
 df_yearly_datagrid = pd.concat([df_yearly_indices, df_yearly], axis=1)
 
 # NOTE: Monthly
+def categorize_monthly_col_vals(df, col, type=''):
+    new_df = categorize_col_vals(df, col, type)
+    new_df['month'] = df['month']
+    return new_df
+
 df_monthly_group = df.copy().groupby("year")

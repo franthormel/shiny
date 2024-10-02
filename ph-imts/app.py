@@ -315,22 +315,32 @@ with ui.navset_card_pill(id="navset_current"):
                 year_input.set(int(input.selectize_monthly_year()))
             
             @reactive.calc
-            def choose_summary_data():
+            def choose_monthly_summary():
                 year = int(input.selectize_monthly_year())
                 return df_yearly.loc[year]
             
             @reactive.calc
-            def choose_trade_values():
+            def choose_monthly_data():
                 year = int(input.selectize_monthly_year())
                 return df_monthly_group.get_group(year)
             
             @reactive.calc
-            def choose_imports_exports_data():
+            def choose_monthly_imports_exports():
                 year = int(input.selectize_monthly_year())
                 monthly_df = df_monthly_group.get_group(year)
                 monthly_df_imports_exports = pd.concat([
-                    categorize_col_vals(monthly_df, "exports", "Exports"),
-                    categorize_col_vals(monthly_df, "imports", "Imports")
+                    categorize_monthly_col_vals(monthly_df, "exports", "Exports"),
+                    categorize_monthly_col_vals(monthly_df, "imports", "Imports")
+                ])
+                return monthly_df_imports_exports
+            
+            @reactive.calc
+            def choose_monthly_imports_exports_growth_rates():
+                year = int(input.selectize_monthly_year())
+                monthly_df = df_monthly_group.get_group(year)
+                monthly_df_imports_exports = pd.concat([
+                    categorize_monthly_col_vals(monthly_df, "exports_growth_rate", "Exports"),
+                    categorize_monthly_col_vals(monthly_df, "imports_growth_rate", "Imports")
                 ])
                 return monthly_df_imports_exports
             
@@ -343,7 +353,7 @@ with ui.navset_card_pill(id="navset_current"):
                         
                         @render.express
                         def exports():
-                            format_currency(choose_summary_data()['exports'])
+                            format_currency(choose_monthly_summary()['exports'])
 
                     # Imports
                     with ui.value_box():
@@ -351,7 +361,7 @@ with ui.navset_card_pill(id="navset_current"):
                         
                         @render.express
                         def imports():
-                            format_currency(choose_summary_data()['imports'])
+                            format_currency(choose_monthly_summary()['imports'])
 
                     # Balance of Trade
                     with ui.value_box():
@@ -359,7 +369,7 @@ with ui.navset_card_pill(id="navset_current"):
                         
                         @render.express
                         def balance_of_trade():
-                            format_currency(choose_summary_data()['balance_of_trade'])
+                            format_currency(choose_monthly_summary()['balance_of_trade'])
                             
                     # Total Trade
                     with ui.value_box():
@@ -367,13 +377,99 @@ with ui.navset_card_pill(id="navset_current"):
                         
                         @render.express
                         def total():
-                            format_currency(choose_summary_data()['total_trade'])
+                            format_currency(choose_monthly_summary()['total_trade'])
+                
+                # Trade Values (Line charts)
+                with ui.card(full_screen=True):
+                    line_chart_monthly_labels={
+                        "values": "Trade Value (million USD)",
+                        "type": "Type",
+                        "month": "Trade Month",
+                        "total_trade": "Total Trade Value (million USD)",
+                        "balance_of_trade": "Balance of Trade Value (million USD)",
+                    }
+                    
+                    with ui.card_header():
+                        "Trade Values"
 
-                # TODO: Trade Values Growth Rates (Line charts)
+                    @render_widget
+                    def line_chart_monthly_import_exports():
+                        fig = create_line_chart_imports_exports(
+                            df=choose_monthly_imports_exports(),
+                            markers=input.checkbox_show_line_chart_markers(),
+                            x="month",
+                            title=f"Imports, Exports of {input.selectize_monthly_year()}",
+                            labels=line_chart_monthly_labels
+                        )
+                        return fig
+                        
+                    @render_widget
+                    def line_chart_monthly_total():
+                        return px.line(
+                            choose_monthly_data(),
+                            x="month",
+                            y="total_trade",
+                            markers=input.checkbox_show_line_chart_markers(),
+                            title=f"Total Trade Value of {input.selectize_monthly_year()}",
+                            labels=line_chart_monthly_labels
+                        )
+                    
+                    @render_widget
+                    def line_chart_monthly_balance():
+                        return px.line(
+                            choose_monthly_data(),
+                            x="month",
+                            y="balance_of_trade",
+                            markers=input.checkbox_show_line_chart_markers(),
+                            title=f"Balance of Trade Value of {input.selectize_monthly_year()}",
+                            labels=line_chart_monthly_labels
+                        )
                 
-                
-                # TODO: Trade Values Growth Rates (Line charts)
-                
+                # Trade Values Growth Rates (Line charts)
+                with ui.card(full_screen=True):
+                    line_chart_monthly_labels_growth_rates={
+                        "values": "Trade Value Growth Rates (percentage)",
+                        "type": "Type",
+                        "month": "Trade Month",
+                        "total_trade_growth_rate": "Total Trade Value Growth Rates (percentage)",
+                        "balance_of_trade_growth_rate": "Balance of Trade Value Growth Rates (percentage)",
+                    }
+                    
+                    with ui.card_header():
+                        "Trade Values Growth Rates"
+                            
+                    @render_widget
+                    def line_chart_monthly_import_exports_growth_rate():
+                        fig = create_line_chart_imports_exports(
+                            df=choose_monthly_imports_exports(),
+                            markers=input.checkbox_show_line_chart_markers(),
+                            x="month",
+                            title=f"Imports, Exports Growth Rates of {input.selectize_monthly_year()}",
+                            labels=line_chart_monthly_labels_growth_rates
+                        )
+                        return fig
+                    
+                    @render_widget
+                    def line_chart_monthly_total_growth_rate():
+                        return px.line(
+                            choose_monthly_data(),
+                            x="month",
+                            y="total_trade_growth_rate",
+                            markers=input.checkbox_show_line_chart_markers(),
+                            title=f"Total Trade Value Growth Rates of {input.selectize_monthly_year()}",
+                            labels=line_chart_monthly_labels_growth_rates
+                        )
+                    
+                    @render_widget
+                    def line_chart_monthly_balance_growth_rate():
+                        return px.line(
+                            choose_monthly_data(),
+                            x="month",
+                            y="balance_of_trade_growth_rate",
+                            markers=input.checkbox_show_line_chart_markers(),
+                            title=f"Balance of Trade Value Growth Rates of {input.selectize_monthly_year()}",
+                            labels=line_chart_monthly_labels_growth_rates
+                        )
                 
                 # Pie chart
                 with ui.card(full_screen=True):
@@ -383,7 +479,7 @@ with ui.navset_card_pill(id="navset_current"):
                     @render_widget
                     def pie_chart():
                         return px.pie(
-                            data_frame=choose_imports_exports_data(), 
+                            data_frame=choose_monthly_imports_exports(), 
                             values='values', 
                             names='type'
                         )
@@ -395,4 +491,4 @@ with ui.navset_card_pill(id="navset_current"):
                     
                     @render.data_frame
                     def datagrid():
-                        return render.DataGrid(pd.DataFrame(choose_trade_values()), selection_mode="rows")
+                        return render.DataGrid(pd.DataFrame(choose_monthly_data()), selection_mode="rows")

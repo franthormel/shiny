@@ -57,10 +57,10 @@ def cards_summary(input, output, session, df):
                 format_currency(df['total_trade'])
 
 @module
-def pie_chart(input, output, session, df, title):
+def pie_chart(input, output, session, df):
     with ui.card(full_screen=True):
         with ui.card_header():
-            title
+            "Trade Composition"
         
         @render_widget
         def pie_chart():
@@ -197,7 +197,7 @@ with ui.navset_card_pill(id="navset_current"):
                         labels=line_chart_all_labels_growth_rates
                     )
                 
-            pie_chart("pie_chart_all", df_all_chart_import_exports, "Trade Composition")
+            pie_chart("pie_chart_all", df_all_chart_import_exports)
             data_grid("data_grid_all", df, "Trade Data")
                     
     with ui.nav_panel("Yearly"):
@@ -296,7 +296,7 @@ with ui.navset_card_pill(id="navset_current"):
                         labels=line_chart_yearly_labels_growth_rates
                     )
             
-            pie_chart("pie_chart_yearly", df_yearly_chart_import_exports, "Trade Composition")
+            pie_chart("pie_chart_yearly", df_yearly_chart_import_exports)
             data_grid("data_grid_yearly", df_yearly_datagrid, "Trade Data")
         
     with ui.nav_panel("Monthly"):
@@ -315,14 +315,24 @@ with ui.navset_card_pill(id="navset_current"):
                 year_input.set(int(input.selectize_monthly_year()))
             
             @reactive.calc
-            def choose_monthly_series():
+            def choose_summary_data():
                 year = int(input.selectize_monthly_year())
                 return df_yearly.loc[year]
             
             @reactive.calc
-            def choose_monthly_df():
+            def choose_trade_values():
                 year = int(input.selectize_monthly_year())
                 return df_monthly_group.get_group(year)
+            
+            @reactive.calc
+            def choose_imports_exports_data():
+                year = int(input.selectize_monthly_year())
+                monthly_df = df_monthly_group.get_group(year)
+                monthly_df_imports_exports = pd.concat([
+                    categorize_col_vals(monthly_df, "exports", "Exports"),
+                    categorize_col_vals(monthly_df, "imports", "Imports")
+                ])
+                return monthly_df_imports_exports
             
             with ui.layout_columns(fill=False, col_widths=[12]):
                 # Summary
@@ -333,7 +343,7 @@ with ui.navset_card_pill(id="navset_current"):
                         
                         @render.express
                         def exports():
-                            format_currency(choose_monthly_series()['exports'])
+                            format_currency(choose_summary_data()['exports'])
 
                     # Imports
                     with ui.value_box():
@@ -341,7 +351,7 @@ with ui.navset_card_pill(id="navset_current"):
                         
                         @render.express
                         def imports():
-                            format_currency(choose_monthly_series()['imports'])
+                            format_currency(choose_summary_data()['imports'])
 
                     # Balance of Trade
                     with ui.value_box():
@@ -349,7 +359,7 @@ with ui.navset_card_pill(id="navset_current"):
                         
                         @render.express
                         def balance_of_trade():
-                            format_currency(choose_monthly_series()['balance_of_trade'])
+                            format_currency(choose_summary_data()['balance_of_trade'])
                             
                     # Total Trade
                     with ui.value_box():
@@ -357,7 +367,7 @@ with ui.navset_card_pill(id="navset_current"):
                         
                         @render.express
                         def total():
-                            format_currency(choose_monthly_series()['total_trade'])
+                            format_currency(choose_summary_data()['total_trade'])
 
                 # TODO: Trade Values Growth Rates (Line charts)
                 
@@ -365,8 +375,18 @@ with ui.navset_card_pill(id="navset_current"):
                 # TODO: Trade Values Growth Rates (Line charts)
                 
                 
-                # TODO: Pie chart
-                
+                # Pie chart
+                with ui.card(full_screen=True):
+                    with ui.card_header():
+                        "Trade Composition"
+                    
+                    @render_widget
+                    def pie_chart():
+                        return px.pie(
+                            data_frame=choose_imports_exports_data(), 
+                            values='values', 
+                            names='type'
+                        )
 
                 # Data Grid
                 with ui.card(full_screen=True):
@@ -375,4 +395,4 @@ with ui.navset_card_pill(id="navset_current"):
                     
                     @render.data_frame
                     def datagrid():
-                        return render.DataGrid(pd.DataFrame(choose_monthly_df()), selection_mode="rows")
+                        return render.DataGrid(pd.DataFrame(choose_trade_values()), selection_mode="rows")

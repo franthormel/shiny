@@ -3,6 +3,20 @@
 * *Partial data from 2024 is not included
 
 
+## Screenshots
+
+**Trade Summary**
+![Trade Summary](./screenshots/all_summary.png)
+
+**Trade Growth Rates**
+![Trade Growth Rates](./screenshots/yearly_growth_rates.png)
+
+**Trade Compsition**
+![Trade Compsition](./screenshots/monthly_trade_composition.png)
+
+**Trade Values**
+![Trade Values](./screenshots/all_trade_values.png)
+
 ### Balance of Trade Growth Rates
 
 It is essential to compare the actual two values (current & previous) instead of purely relying on the given *growth rate*.

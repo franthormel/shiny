@@ -15,4 +15,4 @@ Requires Python (at least v3.12.6)
 
 ## Project
 
-1. `ph-imts` Philippine International Merchandise Trade Statistics from 1991 to 2023
+1. [`ph-imts`](./ph-imts/) Philippine International Merchandise Trade Statistics from 1991 to 2023
